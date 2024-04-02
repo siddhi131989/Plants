@@ -16,8 +16,8 @@ import numpy as np
 # Function to load model and labels
 @st.cache(allow_output_mutation=True)
 def load_data():
-    model_path = "/Users/siddh/OneDrive/Desktop/file/keras_model.h5"
-    label_path = "/Users/siddh/OneDrive/Desktop/file/labels.txt"
+    model_path = "keras_model.h5"
+    label_path = "labels.txt"
     model = load_model(model_path, compile=False)
     class_names = open(label_path, "r").readlines()
     return model, class_names
@@ -55,6 +55,8 @@ def predict_disease(image, model):
 # Main function
 def main():
     st.title("Plantcare: Disease Detection System")
+    image_path = "home_page.jpeg"
+    st.image(image_path, use_column_width=True)
     menu = ["Home", "About"]
     choice = st.sidebar.selectbox("Navigation", menu)
     st.markdown("""
