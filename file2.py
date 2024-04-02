@@ -13,20 +13,12 @@ import numpy as np
 
 # In[4]:
 
-class CustomDepthwiseConv2D(tf.keras.layers.Layer):
-    def __init__(self, kernel_size, **kwargs):
-        super(CustomDepthwiseConv2D, self).__init__()
-        self.depthwise_conv = tf.keras.layers.DepthwiseConv2D(kernel_size, **kwargs)
-
-    def call(self, inputs):
-        return self.depthwise_conv(inputs)
-
 # Function to load model and labels
 @st.cache(allow_output_mutation=True)
 def load_data():
     model_path = "keras_model.h5"
     label_path = "labels.txt"
-    model = load_model(model_path, compile=False, custom_objects={'CustomDepthwiseConv2D': CustomDepthwiseConv2D})
+    model = load_model(model_path, compile=False)
     class_names = open(label_path, "r").readlines()
     return model, class_names
 
