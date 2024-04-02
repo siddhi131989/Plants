@@ -55,10 +55,8 @@ def predict_disease(image, model):
 # Main function
 def main():
     st.title("Plantcare: Disease Detection System")
-    image_path = "/Users/siddh/OneDrive/Desktop/model final/home_page.jpeg"
     menu = ["Home", "About"]
     choice = st.sidebar.selectbox("Navigation", menu)
-    st.image(image_path, use_column_width=True)
     st.markdown("""
     Welcome to the PlantCare: Plant Disease Recognition System! 🌿🔍
     
