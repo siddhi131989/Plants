@@ -21,20 +21,22 @@ class CustomDepthwiseConv2D(DepthwiseConv2D):
 
 # Function to load model and labels
 @st.cache(allow_output_mutation=True)
-def load_data():
+def load_model_with_custom_layer(model_path):
     try:
-        model_path = "keras_model.h5"
-        label_path = "labels.txt"
         model = load_model(model_path, custom_objects={'CustomDepthwiseConv2D': CustomDepthwiseConv2D})
-        class_names = open(label_path, "r").readlines()
-        return model, class_names
+        return model
     except Exception as e:
         st.error("Error loading model: {}".format(str(e)))
-        return None, None
+        return None
 
-
-# In[5]:
-
+@st.cache(allow_output_mutation=True)
+def load_labels(label_path):
+    try:
+        class_names = open(label_path, "r").readlines()
+        return class_names
+    except Exception as e:
+        st.error("Error loading labels: {}".format(str(e)))
+        return None
 
 # Function to preprocess the image
 def preprocess_image(image):
@@ -43,10 +45,6 @@ def preprocess_image(image):
     image_array = np.asarray(image)
     normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
     return normalized_image_array
-
-
-# In[6]:
-
 
 # Function to make prediction
 def predict_disease(image, model, class_names):
@@ -104,10 +102,15 @@ def main():
             st.image(image, caption="Uploaded Image", use_column_width=True)
 
             if st.button("Detect Disease"):
-                model, class_names = load_data()
-                class_name, confidence_score = predict_disease(image, model)
-                st.write("Class:", class_name[2:])
-                st.write("Confidence Score:", confidence_score)
+                model_path = "keras_model.h5"
+                label_path = "labels.txt"
+                model = load_model_with_custom_layer(model_path)
+                class_names = load_labels(label_path)
+                if model is not None and class_names is not None:
+                    class_name, confidence_score = predict_disease(image, model, class_names)
+                    if class_name is not None and confidence_score is not None:
+                        st.write("Class:", class_name[2:])
+                        st.write("Confidence Score:", confidence_score)
 
     elif choice == "About":
         st.title("About")
@@ -121,9 +124,9 @@ def main():
                 2. test (49 images)
                 3. validation (1551 images)
                 """)
+
 if __name__ == "__main__":
     main()
-
 
 # In[ ]:
 
