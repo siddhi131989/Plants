@@ -13,14 +13,24 @@ import numpy as np
 
 # In[4]:
 
+
+# Define CustomDepthwiseConv2D layer
+class CustomDepthwiseConv2D(DepthwiseConv2D):
+    def __init__(self, kernel_size, **kwargs):
+        super(CustomDepthwiseConv2D, self).__init__(kernel_size, **kwargs)
+
 # Function to load model and labels
 @st.cache(allow_output_mutation=True)
 def load_data():
-    model_path = "keras_model.h5"
-    label_path = "labels.txt"
-    model = load_model(model_path, compile=False)
-    class_names = open(label_path, "r").readlines()
-    return model, class_names
+    try:
+        model_path = "keras_model.h5"
+        label_path = "labels.txt"
+        model = load_model(model_path, custom_objects={'CustomDepthwiseConv2D': CustomDepthwiseConv2D})
+        class_names = open(label_path, "r").readlines()
+        return model, class_names
+    except Exception as e:
+        st.error("Error loading model: {}".format(str(e)))
+        return None, None
 
 
 # In[5]:
@@ -39,14 +49,18 @@ def preprocess_image(image):
 
 
 # Function to make prediction
-def predict_disease(image, model):
-    data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-    data[0] = preprocess_image(image)
-    prediction = model.predict(data)
-    index = np.argmax(prediction)
-    class_name = class_names[index]
-    confidence_score = prediction[0][index]
-    return class_name, confidence_score
+def predict_disease(image, model, class_names):
+    try:
+        data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+        data[0] = preprocess_image(image)
+        prediction = model.predict(data)
+        index = np.argmax(prediction)
+        class_name = class_names[index]
+        confidence_score = prediction[0][index]
+        return class_name, confidence_score
+    except Exception as e:
+        st.error("Error predicting disease: {}".format(str(e)))
+        return None, None
 
 
 # In[8]:
