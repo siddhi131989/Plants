@@ -5,20 +5,29 @@
 
 
 import streamlit as st
+import tensorflow as tf
 from keras.models import load_model
+from tensorflow.keras.layers import DepthwiseConv2D
 from PIL import Image, ImageOps
 import numpy as np
 
+# Define custom DepthwiseConv2D layer
+class CustomDepthwiseConv2D(tf.keras.layers.Layer):
+    def __init__(self, *args, **kwargs):
+        super(CustomDepthwiseConv2D, self).__init__()
+        self.depthwise_conv2d = DepthwiseConv2D(*args, **kwargs)
 
-# In[4]:
-
+    def call(self, inputs):
+        return self.depthwise_conv2d(inputs)
 
 # Function to load model and labels
 @st.cache(allow_output_mutation=True)
 def load_data():
     model_path = "keras_model.h5"
     label_path = "labels.txt"
-    model = load_model(model_path, compile=False)
+    # Define custom objects for loading the model
+    custom_objects = {"CustomDepthwiseConv2D": CustomDepthwiseConv2D}
+    model = load_model(model_path, custom_objects=custom_objects, compile=False)
     class_names = open(label_path, "r").readlines()
     return model, class_names
 
