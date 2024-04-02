@@ -6,7 +6,6 @@
 
 import streamlit as st
 from keras.models import load_model
-from tensorflow.keras.layers import Layer, DepthwiseConv2D
 from PIL import Image, ImageOps
 import numpy as np
 
@@ -14,29 +13,18 @@ import numpy as np
 # In[4]:
 
 
-# Define CustomDepthwiseConv2D layer
-class CustomDepthwiseConv2D(DepthwiseConv2D):
-    def __init__(self, kernel_size, **kwargs):
-        super(CustomDepthwiseConv2D, self).__init__(kernel_size, **kwargs)
-
 # Function to load model and labels
 @st.cache(allow_output_mutation=True)
-def load_model_with_custom_layer(model_path):
-    try:
-        model = load_model(model_path, custom_objects={'CustomDepthwiseConv2D': CustomDepthwiseConv2D})
-        return model
-    except Exception as e:
-        st.error("Error loading model: {}".format(str(e)))
-        return None
+def load_data():
+    model_path = "/Users/siddh/OneDrive/Desktop/file/keras_model.h5"
+    label_path = "/Users/siddh/OneDrive/Desktop/file/labels.txt"
+    model = load_model(model_path, compile=False)
+    class_names = open(label_path, "r").readlines()
+    return model, class_names
 
-@st.cache(allow_output_mutation=True)
-def load_labels(label_path):
-    try:
-        class_names = open(label_path, "r").readlines()
-        return class_names
-    except Exception as e:
-        st.error("Error loading labels: {}".format(str(e)))
-        return None
+
+# In[5]:
+
 
 # Function to preprocess the image
 def preprocess_image(image):
@@ -46,19 +34,19 @@ def preprocess_image(image):
     normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
     return normalized_image_array
 
+
+# In[6]:
+
+
 # Function to make prediction
-def predict_disease(image, model, class_names):
-    try:
-        data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-        data[0] = preprocess_image(image)
-        prediction = model.predict(data)
-        index = np.argmax(prediction)
-        class_name = class_names[index]
-        confidence_score = prediction[0][index]
-        return class_name, confidence_score
-    except Exception as e:
-        st.error("Error predicting disease: {}".format(str(e)))
-        return None, None
+def predict_disease(image, model):
+    data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+    data[0] = preprocess_image(image)
+    prediction = model.predict(data)
+    index = np.argmax(prediction)
+    class_name = class_names[index]
+    confidence_score = prediction[0][index]
+    return class_name, confidence_score
 
 
 # In[8]:
@@ -67,10 +55,10 @@ def predict_disease(image, model, class_names):
 # Main function
 def main():
     st.title("Plantcare: Disease Detection System")
-    image_path = "home_page.jpeg"
-    st.image(image_path, use_column_width=True)
+    image_path = "/Users/siddh/OneDrive/Desktop/model final/home_page.jpeg"
     menu = ["Home", "About"]
     choice = st.sidebar.selectbox("Navigation", menu)
+    st.image(image_path, use_column_width=True)
     st.markdown("""
     Welcome to the PlantCare: Plant Disease Recognition System! 🌿🔍
     
@@ -102,15 +90,10 @@ def main():
             st.image(image, caption="Uploaded Image", use_column_width=True)
 
             if st.button("Detect Disease"):
-                model_path = "keras_model.h5"
-                label_path = "labels.txt"
-                model = load_model_with_custom_layer(model_path)
-                class_names = load_labels(label_path)
-                if model is not None and class_names is not None:
-                    class_name, confidence_score = predict_disease(image, model, class_names)
-                    if class_name is not None and confidence_score is not None:
-                        st.write("Class:", class_name[2:])
-                        st.write("Confidence Score:", confidence_score)
+                model, class_names = load_data()
+                class_name, confidence_score = predict_disease(image, model)
+                st.write("Class:", class_name[2:])
+                st.write("Confidence Score:", confidence_score)
 
     elif choice == "About":
         st.title("About")
@@ -124,9 +107,9 @@ def main():
                 2. test (49 images)
                 3. validation (1551 images)
                 """)
-
 if __name__ == "__main__":
     main()
+
 
 # In[ ]:
 
