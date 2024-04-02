@@ -13,7 +13,6 @@ import numpy as np
 
 # In[4]:
 
-# Define CustomDepthwiseConv2D layer
 class CustomDepthwiseConv2D(tf.keras.layers.Layer):
     def __init__(self, kernel_size, **kwargs):
         super(CustomDepthwiseConv2D, self).__init__()
