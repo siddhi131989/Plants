@@ -11,56 +11,27 @@ from tensorflow.keras.layers import Layer, DepthwiseConv2D
 from PIL import Image, ImageOps
 import numpy as np
 
-# Define the custom layer class
+# Define custom DepthwiseConv2D layer
 class CustomDepthwiseConv2D(tf.keras.layers.Layer):
-    def __init__(self, config, **kwargs):
-        super(CustomDepthwiseConv2D, self).__init__(**kwargs)
-        self.config = config
-        self.depthwise_filter = self.build_depthwise_filter()
-
-    def build_depthwise_filter(self):
-        # Extract configuration parameters
-        kernel_size = self.config['kernel_size']
-        dtype = self.config['dtype']
-        
-        # Create the depthwise filter manually
-        return tf.Variable(tf.random.normal(shape=(*kernel_size, 1, 1), dtype=dtype), trainable=True)
+    def __init__(self, *args, **kwargs):
+        super(CustomDepthwiseConv2D, self).__init__()
+        self.depthwise_conv2d = DepthwiseConv2D(kernel_size=(3, 3), padding='same', **kwargs)
 
     def call(self, inputs):
-        return tf.nn.depthwise_conv2d(inputs, self.depthwise_filter, **self.config)
+        return self.depthwise_conv2d(inputs)
 
-# Define the configuration
-config = {
-    'name': 'block_10_depthwise',
-    'trainable': True,
-    'dtype': 'float32',
-    'kernel_size': (3, 3),
-    'strides': (1, 1),
-    'padding': 'SAME',
-    'data_format': 'NHWC',
-}
-
-# Create an instance of the custom layer with the specified configuration
-custom_depthwise_conv2d = CustomDepthwiseConv2D(config)
-
-
-
-@st.cache_data
+# Function to load model with custom layer
 def load_model_with_custom_layer(model_path):
     try:
-        model = load_model(model_path, custom_objects={'CustomDepthwiseConv2D': CustomDepthwiseConv2D})
+        # Define custom objects to remove 'groups' parameter
+        custom_objects = {
+            'DepthwiseConv2D': lambda kwargs: tf.keras.layers.DepthwiseConv2D(kwargs.pop('name', None), **kwargs)
+        }
+        # Load the model with custom objects
+        model = load_model(model_path, custom_objects=custom_objects)
         return model
     except Exception as e:
         st.error("Error loading model: {}".format(str(e)))
-        return None
-
-@st.cache_data
-def load_labels(label_path):
-    try:
-        class_names = open(label_path, "r").readlines()
-        return class_names
-    except Exception as e:
-        st.error("Error loading labels: {}".format(str(e)))
         return None
 
 # Function to preprocess the image
@@ -121,12 +92,10 @@ def main():
         if uploaded_file is not None:
             image = Image.open(uploaded_file).convert("RGB")
             st.image(image, caption="Uploaded Image", use_column_width=True)
-            print("Image uploaded successfully")  # Add this line to indicate successful image upload
 
             if st.button("Detect Disease"):
                 model_path = "keras_model.h5"
                 label_path = "labels.txt"
-                print("Loading model...")  # Add this line to indicate model loading process
                 model = load_model_with_custom_layer(model_path)
                 class_names = load_labels(label_path)
                 if model is not None and class_names is not None:
@@ -134,7 +103,6 @@ def main():
                     if class_name is not None and confidence_score is not None:
                         st.write("Class:", class_name[2:])
                         st.write("Confidence Score:", confidence_score)
-                        print("Prediction:", class_name[2:], confidence_score)
 
     elif choice == "About":
         st.title("About")
@@ -151,6 +119,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 # In[ ]:
 
