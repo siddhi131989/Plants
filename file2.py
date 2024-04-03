@@ -20,7 +20,7 @@ class CustomDepthwiseConv2D(tf.keras.layers.Layer):
     def call(self, inputs):
         return self.depthwise_conv2d(inputs)
 
-@st.cache_resource(allow_output_mutation=True)
+@st.cache_data
 def load_model_with_custom_layer(model_path):
     try:
         model = load_model(model_path, custom_objects={'CustomDepthwiseConv2D': CustomDepthwiseConv2D})
@@ -29,7 +29,7 @@ def load_model_with_custom_layer(model_path):
         st.error("Error loading model: {}".format(str(e)))
         return None
 
-@st.cache_resource(allow_output_mutation=True)
+@st.cache_data
 def load_labels(label_path):
     try:
         class_names = open(label_path, "r").readlines()
