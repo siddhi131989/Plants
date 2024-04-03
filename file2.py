@@ -16,10 +16,18 @@ class CustomDepthwiseConv2D(tf.keras.layers.Layer):
     def __init__(self, config, **kwargs):
         super(CustomDepthwiseConv2D, self).__init__(**kwargs)
         self.config = config
-        self.depthwise_conv2d = tf.keras.layers.DepthwiseConv2D(**config)
+        self.depthwise_filter = self.build_depthwise_filter()
+
+    def build_depthwise_filter(self):
+        # Extract configuration parameters
+        kernel_size = self.config['kernel_size']
+        dtype = self.config['dtype']
+        
+        # Create the depthwise filter manually
+        return tf.Variable(tf.random.normal(shape=(*kernel_size, 1, 1), dtype=dtype), trainable=True)
 
     def call(self, inputs):
-        return self.depthwise_conv2d(inputs)
+        return tf.nn.depthwise_conv2d(inputs, self.depthwise_filter, **self.config)
 
 # Define the configuration
 config = {
@@ -28,13 +36,8 @@ config = {
     'dtype': 'float32',
     'kernel_size': (3, 3),
     'strides': (1, 1),
-    'padding': 'same',
-    'data_format': 'channels_last',
-    'dilation_rate': (1, 1),
-    'groups': 1,
-    'activation': 'linear',
-    'use_bias': False,
-    'bias_initializer': {'class_name': 'Zeros', 'config': {}}
+    'padding': 'SAME',
+    'data_format': 'NHWC',
 }
 
 # Create an instance of the custom layer with the specified configuration
