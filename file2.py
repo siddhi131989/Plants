@@ -15,10 +15,13 @@ import numpy as np
 class CustomDepthwiseConv2D(tf.keras.layers.Layer):
     def __init__(self, *args, **kwargs):
         super(CustomDepthwiseConv2D, self).__init__()
+        if 'groups' in kwargs:
+            del kwargs['groups']  # Remove 'groups' parameter if present
         self.depthwise_conv2d = DepthwiseConv2D(kernel_size=(3, 3), padding='same', **kwargs)
 
     def call(self, inputs):
         return self.depthwise_conv2d(inputs)
+
 
 @st.cache_data
 def load_model_with_custom_layer(model_path):
