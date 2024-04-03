@@ -6,36 +6,18 @@ from PIL import Image, ImageOps
 import numpy as np
 
 from keras.models import load_model
-import json
-from keras.models import model_from_json
-
-# Load the model
-model = load_model('keras_model.h5')
-
-# Save the model architecture as JSON
-model_json = model.to_json()
-with open('your_model.json', 'w') as json_file:
-    json_file.write(model_json)
-
-
-
+# Custom DepthwiseConv2D layer
+class CustomDepthwiseConv2D(DepthwiseConv2D):
+    def __init__(self, *args, **kwargs):
+        # Remove 'groups' from kwargs
+        kwargs.pop('groups', None)
+        super(CustomDepthwiseConv2D, self).__init__(*args, **kwargs)
 
 # Function to load model with custom layer
 def load_model_with_custom_layer(model_path):
     try:
-        # Load the model architecture from JSON
-        with open(model_path + '.json', 'r') as json_file:
-            model_json = json_file.read()
-            # Modify JSON to remove 'groups' parameter
-            model_json = model_json.replace('"groups": 1,', '')
-            # Convert modified JSON back to dictionary
-            model_config = json.loads(model_json)
-        
-        # Load the model with modified configuration
-        model = model_from_json(json.dumps(model_config))
-        # Load model weights
-        model.load_weights(model_path + '.h5')
-        
+        # Load the model with custom objects
+        model = load_model(model_path, custom_objects={'CustomDepthwiseConv2D': CustomDepthwiseConv2D})
         return model
     except Exception as e:
         st.error("Error loading model: {}".format(str(e)))
