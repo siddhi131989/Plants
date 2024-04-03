@@ -135,39 +135,6 @@ def main():
                 """)
 
 if __name__ == "__main__":
-    main()if choice == "Home":
-        st.header("Upload Image")
-        uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file).convert("RGB")
-            st.image(image, caption="Uploaded Image", use_column_width=True)
-
-            if st.button("Detect Disease"):
-                model_path = "keras_model.h5"
-                label_path = "labels.txt"
-                model = load_model_with_custom_layer(model_path)
-                class_names = load_labels(label_path)
-                if model is not None and class_names is not None:
-                    class_name, confidence_score = predict_disease(image, model, class_names)
-                    if class_name is not None and confidence_score is not None:
-                        st.write("Class:", class_name[2:])
-                        st.write("Confidence Score:", confidence_score)
-
-    elif choice == "About":
-        st.title("About")
-        st.markdown("""
-                #### About Dataset
-                This dataset is recreated using offline augmentation from the original dataset. The original dataset can be found on this GitHub repo.
-                This dataset consists of about 8K RGB images of healthy and diseased crop leaves which are categorized into 28 different classes. The total dataset is divided into an 80/20 ratio of training and validation set preserving the directory structure.
-                A new directory containing 33 test images is created later for prediction purpose.
-                #### Content
-                1. train (6400 images)
-                2. test (49 images)
-                3. validation (1551 images)
-                """)
-
-if __name__ == "__main__":
     main()
 
 # In[ ]:
