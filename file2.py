@@ -6,6 +6,8 @@ from PIL import Image, ImageOps
 import numpy as np
 
 from keras.models import load_model
+import json
+from keras.models import model_from_json
 
 # Load the model
 model = load_model('keras_model.h5')
@@ -16,8 +18,7 @@ with open('your_model.json', 'w') as json_file:
     json_file.write(model_json)
 
 
-import json
-from keras.models import model_from_json
+
 
 # Function to load model with custom layer
 def load_model_with_custom_layer(model_path):
