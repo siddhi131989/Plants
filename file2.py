@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import streamlit as st
 import tensorflow as tf
 from keras.models import load_model
@@ -32,6 +26,16 @@ def load_model_with_custom_layer(model_path):
         return model
     except Exception as e:
         st.error("Error loading model: {}".format(str(e)))
+        return None
+
+# Function to load labels
+@st.cache_data
+def load_labels(label_path):
+    try:
+        class_names = open(label_path, "r").readlines()
+        return class_names
+    except Exception as e:
+        st.error("Error loading labels: {}".format(str(e)))
         return None
 
 # Function to preprocess the image
@@ -99,30 +103,4 @@ def main():
                 model = load_model_with_custom_layer(model_path)
                 class_names = load_labels(label_path)
                 if model is not None and class_names is not None:
-                    class_name, confidence_score = predict_disease(image, model, class_names)
-                    if class_name is not None and confidence_score is not None:
-                        st.write("Class:", class_name[2:])
-                        st.write("Confidence Score:", confidence_score)
-
-    elif choice == "About":
-        st.title("About")
-        st.markdown("""
-                #### About Dataset
-                This dataset is recreated using offline augmentation from the original dataset. The original dataset can be found on this GitHub repo.
-                This dataset consists of about 8K RGB images of healthy and diseased crop leaves which are categorized into 28 different classes. The total dataset is divided into an 80/20 ratio of training and validation set preserving the directory structure.
-                A new directory containing 33 test images is created later for prediction purpose.
-                #### Content
-                1. train (6400 images)
-                2. test (49 images)
-                3. validation (1551 images)
-                """)
-
-if __name__ == "__main__":
-    main()
-
-
-# In[ ]:
-
-
-
-
+                    class_name, confidence_score = predic
