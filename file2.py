@@ -27,7 +27,7 @@ def load_data():
     label_path = "labels.txt"
     # Define custom objects for loading the model
     custom_objects = {"CustomDepthwiseConv2D": CustomDepthwiseConv2D}
-    model = load_model(model_path, custom_objects=custom_objects, compile=False)
+    model = tf.keras.models.load_model(model_path, custom_objects=custom_objects, compile=False)
     class_names = open(label_path, "r").readlines()
     return model, class_names
 
