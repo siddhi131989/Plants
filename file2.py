@@ -96,10 +96,12 @@ def main():
         if uploaded_file is not None:
             image = Image.open(uploaded_file).convert("RGB")
             st.image(image, caption="Uploaded Image", use_column_width=True)
+            print("Image uploaded successfully")  # Add this line to indicate successful image upload
 
             if st.button("Detect Disease"):
                 model_path = "keras_model.h5"
                 label_path = "labels.txt"
+                print("Loading model...")  # Add this line to indicate model loading process
                 model = load_model_with_custom_layer(model_path)
                 class_names = load_labels(label_path)
                 if model is not None and class_names is not None:
@@ -107,6 +109,7 @@ def main():
                     if class_name is not None and confidence_score is not None:
                         st.write("Class:", class_name[2:])
                         st.write("Confidence Score:", confidence_score)
+                        print("Prediction:", class_name[2:], confidence_score)
 
     elif choice == "About":
         st.title("About")
