@@ -20,7 +20,6 @@ class CustomDepthwiseConv2D(tf.keras.layers.Layer):
     def call(self, inputs):
         return self.depthwise_conv2d(inputs)
 
-
 @st.cache(allow_output_mutation=True)
 def load_model_with_custom_layer(model_path):
     try:
@@ -39,10 +38,6 @@ def load_labels(label_path):
         st.error("Error loading labels: {}".format(str(e)))
         return None
 
-
-# In[5]:
-
-
 # Function to preprocess the image
 def preprocess_image(image):
     size = (224, 224)
@@ -50,10 +45,6 @@ def preprocess_image(image):
     image_array = np.asarray(image)
     normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
     return normalized_image_array
-
-
-# In[6]:
-
 
 # Function to make prediction
 def predict_disease(image, model, class_names):
@@ -68,10 +59,6 @@ def predict_disease(image, model, class_names):
     except Exception as e:
         st.error("Error predicting disease: {}".format(str(e)))
         return None, None
-
-
-# In[8]:
-
 
 # Main function
 def main():
