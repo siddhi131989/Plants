@@ -5,20 +5,18 @@ from tensorflow.keras.layers import Layer, DepthwiseConv2D
 from PIL import Image, ImageOps
 import numpy as np
 
+# Custom DepthwiseConv2D layer
+class CustomDepthwiseConv2D(DepthwiseConv2D):
+    def __init__(self, *args, **kwargs):
+        # Remove 'groups' from kwargs
+        kwargs.pop('groups', None)
+        super(CustomDepthwiseConv2D, self).__init__(*args, **kwargs)
+
 # Function to load model with custom layer
 def load_model_with_custom_layer(model_path):
     try:
-        # Load the model
-        model = load_model(model_path)
-        
-        # Modify the model configuration to remove the 'groups' parameter
-        for layer in model.layers:
-            if isinstance(layer, DepthwiseConv2D):
-                if 'groups' in layer.get_config():
-                    layer_config = layer.get_config()
-                    del layer_config['groups']
-                    layer.set_config(layer_config)
-        
+        # Load the model with custom objects
+        model = load_model(model_path, custom_objects={'CustomDepthwiseConv2D': CustomDepthwiseConv2D})
         return model
     except Exception as e:
         st.error("Error loading model: {}".format(str(e)))
