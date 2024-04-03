@@ -11,16 +11,34 @@ from tensorflow.keras.layers import Layer, DepthwiseConv2D
 from PIL import Image, ImageOps
 import numpy as np
 
-# Define custom DepthwiseConv2D layer
+# Define the custom layer class
 class CustomDepthwiseConv2D(tf.keras.layers.Layer):
-    def __init__(self, *args, **kwargs):
-        super(CustomDepthwiseConv2D, self).__init__()
-        # Remove 'groups' parameter from kwargs if present
-        kwargs.pop('groups', None)
-        self.depthwise_conv2d = DepthwiseConv2D(kernel_size=(3, 3), padding='same', **kwargs)
+    def __init__(self, config, **kwargs):
+        super(CustomDepthwiseConv2D, self).__init__(**kwargs)
+        self.config = config
+        self.depthwise_conv2d = tf.keras.layers.DepthwiseConv2D(**config)
 
     def call(self, inputs):
         return self.depthwise_conv2d(inputs)
+
+# Define the configuration
+config = {
+    'name': 'block_10_depthwise',
+    'trainable': True,
+    'dtype': 'float32',
+    'kernel_size': (3, 3),
+    'strides': (1, 1),
+    'padding': 'same',
+    'data_format': 'channels_last',
+    'dilation_rate': (1, 1),
+    'groups': 1,
+    'activation': 'linear',
+    'use_bias': False,
+    'bias_initializer': {'class_name': 'Zeros', 'config': {}}
+}
+
+# Create an instance of the custom layer with the specified configuration
+custom_depthwise_conv2d = CustomDepthwiseConv2D(config)
 
 
 
