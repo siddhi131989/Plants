@@ -5,28 +5,25 @@ from tensorflow.keras.layers import Layer, DepthwiseConv2D
 from PIL import Image, ImageOps
 import numpy as np
 
-# Define custom DepthwiseConv2D layer
-class CustomDepthwiseConv2D(tf.keras.layers.Layer):
-    def __init__(self, *args, **kwargs):
-        super(CustomDepthwiseConv2D, self).__init__()
-        self.depthwise_conv2d = DepthwiseConv2D(kernel_size=(3, 3), padding='same', **kwargs)
+from keras.layers import DepthwiseConv2D
 
-    def call(self, inputs):
-        return self.depthwise_conv2d(inputs)
+# Custom DepthwiseConv2D class without the 'groups' argument
+class CustomDepthwiseConv2D(DepthwiseConv2D):
+    def __init__(self, *args, **kwargs):
+        super(CustomDepthwiseConv2D, self).__init__(*args, **kwargs)
 
 # Function to load model with custom layer
 def load_model_with_custom_layer(model_path):
     try:
-        # Define custom objects to remove 'groups' parameter
-        custom_objects = {
-            'DepthwiseConv2D': lambda kwargs: tf.keras.layers.DepthwiseConv2D(kwargs.pop('name', None), **kwargs)
-        }
+        # Define custom objects to replace DepthwiseConv2D with CustomDepthwiseConv2D
+        custom_objects = {'DepthwiseConv2D': CustomDepthwiseConv2D}
         # Load the model with custom objects
         model = load_model(model_path, custom_objects=custom_objects)
         return model
     except Exception as e:
         st.error("Error loading model: {}".format(str(e)))
         return None
+
 
 # Function to load labels
 @st.cache_data
